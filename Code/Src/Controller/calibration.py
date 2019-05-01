@@ -46,7 +46,7 @@ def get_pressure(alpha, version='vS11', max_pressure=1):
                 else:
                     p = eval_poly(clb[version][idx], alp)
                     pressure.append(cut_off(p))
-        return pressure
+        return pressure + [0, 0]  # 8 channels
     except KeyError:
         raise NotImplementedError
 

@@ -409,10 +409,9 @@ class HUIThread(threading.Thread):
                     xref = 
                     
                     # generate reference
-                    alpha, foot = ref_generator.get_next_reference(
+                    alpha, foot, processtime = ref_generator.get_next_reference(
                             act_pos, act_eps, xref)
                     dvtsk, pvtsk = convert_ref(clb.get_pressure(alpha), foot)
-                    processtime = .8
                     # send to main thread
                     self.shared_memory.dvalve_task = dvtsk
                     self.shared_memory.ref_task = pvtsk
@@ -483,6 +482,13 @@ def generate_pose_ref(pattern, idx):
         pv_task[kdx] = pp
 
     return dv_task, pv_task, local_min_process_time
+
+
+
+class CameraReader(self, shared_memory, imgprocsock=None):
+    
+    
+    TODO
 
 
 class Printer(threading.Thread):
