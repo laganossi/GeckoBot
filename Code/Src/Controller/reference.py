@@ -12,11 +12,11 @@ g = {  # manually tuned
              ('000', ((0, 0), 0))],
 
      '100': [#('000', ((0, 0), 0)),
-             ('100f', ((0, .71), 1)), ('100f', ((0.15, .4), -60)),
-             ('100f', ((.1, .53), -30)), ('102', ((.15, .4), -40))],
+             ('100f', ((0, .71), 1)), ('100f', ((0.15, -.2), -80)),
+             ('100f', ((.1, .4), -10)), ('102', ((.1, .3), -20))],
      '100f': [('100df', None)],
-     '100df': [('010', ((0, .71), 1)), ('110', ((.15, .4), -60)),
-               ('101', ((.1, .53), -30))],
+     '100df': [('010', ((0, .71), 1)), ('110', ((.15, -.2), -80)),
+               ('101', ((.1, .4), -10))],
      '110': [('110f', None)],
      '110f': [('110df', None)],
      '110df': [('111', None)],
@@ -24,7 +24,7 @@ g = {  # manually tuned
      '111f': [('111df', None)],
      '111df': [('112', None)],
      '112': [('112f', None)],
-     '112f': [('112df', ((0, 1), 1)), ('110df', ((0, 0), -90))],
+     '112f': [('112df', ((0, 1), 1)), ('110df', ((0.15, -.2), -80))],
      '112df': [('100', None)],
 
      '104': [('104f', None)],
@@ -180,7 +180,7 @@ class ReferenceGenerator(object):
         dpos = xref - act_pos
         act_dir = np.r_[np.cos(np.radians(act_eps)),
                         np.sin(np.radians(act_eps))]
-        deps = calc_angle(dpos, act_dir)
+        act_deps = calc_angle(dpos, act_dir)
         act_dist = np.linalg.norm(dpos)
 
         def suitability(translation_, rotation, v=None):
@@ -228,6 +228,9 @@ class ReferenceGenerator(object):
         self.idx += 1
 
         alpha, feet, process_time = self.__get_ref(pose_id)
+        if pose_id[:3] == '111':
+            if abs(act_deps) < 90:
+                alpha[2] = act_deps
         return alpha, feet, process_time, pose_id
 
     def __get_ref(self, pose_id):
