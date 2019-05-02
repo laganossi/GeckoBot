@@ -210,8 +210,8 @@ def main():
 
             self.xref = (None, None)
             self.rec_aIMG = {name: None for name in CHANNELset}
-            self.rec_X = {name: None for name in range(6)}  # 6 markers
-            self.rec_Y = {name: None for name in range(6)}
+            self.rec_X = {name: None for name in range(8)}  # 6 markers
+            self.rec_Y = {name: None for name in range(8)}
             self.rec_eps = None
 
             self.rec = {name: 0.0 for name in CHANNELset}

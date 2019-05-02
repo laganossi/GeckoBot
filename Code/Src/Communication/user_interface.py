@@ -42,7 +42,7 @@ MODE = {
     2: {'ui_state': 'USER_REFERENCE',
         'main_state': {0: 'PRESSURE_REFERENCE', 1: 'ANGLE_REFERENCE'},
         'pin': MODE2},
-    3: {'ui_state': 'PATTERN_REFERENCE',
+    3: {'ui_state': 'APRILTAG_REFERENCE',
         'main_state': {0: 'PRESSURE_REFERENCE', 1: 'ANGLE_REFERENCE'},
         'pin': MODE3}
     }
@@ -394,10 +394,13 @@ class HUIThread(threading.Thread):
         def apriltag_reference():
             # first select version
             set_leds()
-            version = select_pattern()[0]
+            version = select_pattern()[0][0]
+#            print(version)
             ref_generator = ref_gen.ReferenceGenerator()
 #            dvtsk, pvtsk = convert_ref(
 #                    clb.get_pressure([0, 0, 0, 0, 0], version), [0, 0, 0, 0])
+#            print(dvtsk)
+#            print(pvtsk)
 #            # send to main thread
 #            self.shared_memory.dvalve_task = dvtsk
 #            self.shared_memory.ref_task = pvtsk
@@ -407,19 +410,21 @@ class HUIThread(threading.Thread):
 
                 if (fun1() and self.last_process_time + self.process_time <
                         time.time()):
-                    # where we are?
-                    act_pos = (self.shared_memory.rec_X[1],
-                               self.shared_memory.rec_Y[1])
-                    act_eps = self.shared_memory.rec_eps
-
-                    # where should we go?
                     xref = self.shared_memory.xref
+                    act_eps = self.shared_memory.rec_eps
 
                     # we know everything we have to
                     if xref[0] and act_eps:
+                        act_pos = (self.shared_memory.rec_X[1],
+                                   -self.shared_memory.rec_Y[1])
+                        xref = (xref[0], -xref[1])
+                        
+                        print(xref, act_eps)
                         # generate reference
-                        alpha, foot, ptime = ref_generator.get_next_reference(
+                        alpha, foot, ptime, pose_id =  \
+                            ref_generator.get_next_reference(
                                 act_pos, act_eps, xref)
+                        print(pose_id)
                         dvtsk, pvtsk = convert_ref(
                                 clb.get_pressure(alpha, version), foot)
                         # send to main thread
@@ -441,7 +446,7 @@ class HUIThread(threading.Thread):
         automat.add_state('PAUSE', pause_state)
         automat.add_state('PWM_FEED_THROUGH', pwm_feed_through)
         automat.add_state('USER_REFERENCE', user_reference)
-        automat.add_state('PATTERN_REFERENCE', pattern_reference)
+        automat.add_state('APRILTAG_REFERENCE', apriltag_reference)
         automat.add_state('EXIT', exit_cleaner)
         automat.add_state('QUIT', None, end_state=True)
         automat.set_start('PAUSE')
@@ -517,16 +522,16 @@ class Printer(threading.Thread):
             X = [round(self.shared_memory.rec_X[i], 2)
                  if self.shared_memory.rec_X[i] else None for i in range(8)]
             Y = [round(self.shared_memory.rec_Y[i], 2)
-                 if self.shared_memory.rec_Y else None for i in range(8)],
+                 if self.shared_memory.rec_Y[i] else None for i in range(8)]
         else:
-            aIMG, eps, X, Y = None, None, None, None
+            aIMG, eps, X, Y = [None]*8, None, [None]*8, [None]*8
 
         if self.IMU_connected:
             rec_angle = self.shared_memory.rec_aIMU
             aIMU = [round(rec_angle[i], 2) if rec_angle[i]
                     else None for i in range(8)]
         else:
-            aIMU = None
+            aIMU = [None]*8
 
         return (p, r, u, f, aIMG, eps, X, Y, aIMU,
                 self.IMU_connected, self.IMG_connected)
@@ -547,7 +552,7 @@ class Printer(threading.Thread):
         state_str = state_str + '-'*75 + '\n'
         for i in range(8):
             s = '{}\t| {}\t| {}\t| {}\t| {}\t| {}\t| ({},{})\n'.format(
-                i, r[i], p[i], u[i], aIMG[i], X[i], Y[i])
+                i, r[i], p[i], u[i], aIMU[i], aIMG[i], X[i], Y[i])
             state_str = state_str + s
         print(state_str)
 

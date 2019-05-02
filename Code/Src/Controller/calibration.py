@@ -24,7 +24,7 @@ def get_pressure(alpha, version='vS11', max_pressure=1):
 
     def cut_off(p):
         if p > max_pressure:
-            Warning('clb pressure > max_presse: I cutted it off')
+            # Warning('clb pressure > max_presse: I cutted it off')
             p_ = max_pressure
         elif p < 0:
             p_ = 0.00

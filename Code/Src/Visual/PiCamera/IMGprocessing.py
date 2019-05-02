@@ -66,7 +66,7 @@ def extract_position(april_result):
     for res in april_result:
         tag_id = res.tag_id
         if tag_id == 6:
-            xref = int(res.center[0], res.center[1])
+            xref = (int(res.center[0]), int(res.center[1]))
         else:
             pc0 = np.array([res.corners[SHIFT[tag_id][0]][0],
                             res.corners[SHIFT[tag_id][0]][1]])
@@ -94,9 +94,10 @@ def extract_alpha(april_result):
     center = []
     for res in april_result:
         tag_id = res.tag_id
-        ori[tag_id] = res.corners[2] - res.corners[0]
-        if tag_id == 1 or tag_id == 4:
-            center.append(res.center)
+        if tag_id < 6:
+            ori[tag_id] = res.corners[2] - res.corners[0]
+            if tag_id == 1 or tag_id == 4:
+                center.append(res.center)
 
     angle, eps = [None]*6, None
     for tag_id in POSs:
