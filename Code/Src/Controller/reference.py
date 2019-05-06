@@ -269,7 +269,7 @@ class ReferenceGenerator(object):
             if pose_id == '114':
                 self.last_deps = act_deps
             if abs(self.last_deps) < 90:
-                alpha[2] = self.last_deps
+                alpha[3] = self.last_deps
 
         return alpha, feet, process_time, pose_id
 
